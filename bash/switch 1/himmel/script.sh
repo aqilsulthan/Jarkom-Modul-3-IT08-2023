@@ -4,7 +4,10 @@ apt-get update
 apt-get install -y isc-dhcp-server
 dhcpd --version
 
-echo 'INTERFACES="eth0"' > /etc/default/isc-dhcp-server
+echo '
+INTERFACESv4="eth0"
+INTERFACESv6=""
+' > /etc/default/isc-dhcp-server
 
 echo '
 ddns-update-style none;
@@ -47,6 +50,38 @@ subnet 192.237.4.0 netmask 255.255.255.0 {
     option domain-name-servers 192.237.1.3;
     default-lease-time 720;
     max-lease-time 5760;
+}
+
+# Switch 3
+host Lugner {
+    hardware ethernet 96:b9:d8:27:a2:19;
+    fixed-address 192.237.3.2;
+}
+
+host Linie {
+    hardware ethernet 0a:0c:ac:a9:91:72;
+    fixed-address 192.237.3.3;
+}
+
+host Lawine {
+    hardware ethernet da:9c:24:00:8c:22;
+    fixed-address 192.237.3.4;
+}
+
+# Switch 4
+host Fern {
+    hardware ethernet 46:f1:40:fe:f7:64;
+    fixed-address 192.237.4.2;
+}
+
+host Flamme {
+    hardware ethernet 1a:ab:97:62:57:60;
+    fixed-address 192.237.4.3;
+}
+
+host Frieren {
+    hardware ethernet 02:be:17:c2:21:ed;
+    fixed-address 192.237.4.4;
 }
 ' > /etc/dhcp/dhcpd.conf
 service isc-dhcp-server restart
