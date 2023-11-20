@@ -1,4 +1,5 @@
-echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+# .bashrc
+echo 'nameserver 192.237.1.3' > /etc/resolv.conf
 
 apt-get update
 apt-get install -y isc-dhcp-server

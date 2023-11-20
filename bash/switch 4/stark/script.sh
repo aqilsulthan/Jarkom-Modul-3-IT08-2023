@@ -1,5 +1,11 @@
 ip a
 
+apt update
+apt install lynx -y
+apt install htop -y
+apt install apache2-utils -y
+apt-get install jq -y
+
 echo '
 # auto eth0
 # iface eth0 inet static
