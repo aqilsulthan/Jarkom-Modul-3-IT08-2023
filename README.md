@@ -44,7 +44,6 @@ Adimas Defatra Bimasena | 5027211040
 ### [Konfigurasi](#konfigurasi)
 ```
 Aura (DHCP Relay)
-
 auto eth0
 iface eth0 inet dhcp
 up iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 192.237.0.0/16
@@ -104,8 +103,6 @@ iface eth0 inet static
 	netmask 255.255.255.0
 	gateway 192.237.4.1
 
-# hwaddress ether 
-
 Flamme (Laravel Worker)
 auto eth0
 iface eth0 inet static
@@ -113,16 +110,12 @@ iface eth0 inet static
 	netmask 255.255.255.0
 	gateway 192.237.4.1
 
-# hwaddress ether 
-
 Fern (Laravel Worker)
 auto eth0
 iface eth0 inet static
 	address 192.237.4.2
 	netmask 255.255.255.0
 	gateway 192.237.4.1
-
-# hwaddress ether 
 
 Lawine (PHP Worker)
 auto eth0
@@ -791,7 +784,7 @@ Serta melakukan konfigurasi nginx berdasarkan tiap port dengan konfigurasi seper
 192.237.4.3:8002; # Flamme
 192.237.4.4:8003; # Frieren
 ```
-Serta mennambahkan konfigurasi nginx berikut untuk masing-masing worker berdasarkan port yang telah ditentukan sebelumnya
+Serta menambahkan konfigurasi nginx berikut untuk masing-masing worker berdasarkan port yang telah ditentukan sebelumnya
 ```
 echo '
 server {
@@ -829,31 +822,89 @@ service nginx restart
 service php8.0-fpm start
 ```
 Akses website dengan `lynx localhost:[8001/8002/8003]`
-![Foto](./img/14.png)
 
 ---
 ### Soal 15
 POST /auth/register
 - Penjelasan:
-![Foto](./img/15.png)
+Lakkukan benchmarking pada laravel worker, yang nantinya akan ditesting dengan client. Adapun testing bisa dilakukan dengan mengirim file berformat `.json` sebagai body ke endpoint `/api/auth/register` seperti berikut
+```
+echo '
+{
+  "username": "kelompokIT08",
+  "password": "passwordIT08"
+}' > register.json
+```
+Setelah berhasil terkirim, jalankah perintah benchmarking pada client dengan perintah berikut
+```
+ab -n 100 -c 10 -p register.json -T application/json http://192.237.4.2:8001/api/auth/register
+```
 
 ---
 ### Soal 16 
 POST /auth/login
 - Penjelasan:
-![Foto](./img/16.png)
+Mirip dengan soal sebelumnya, kita bisa melakukan benchmarking pada laravel worker melalui client. Testing dilakukan dnegan mengirim file berformat `.json` sebagai body ke endpoint `/auth/login` seperti berikut
+```
+echo '
+{
+  "username": "kelompokIT08",
+  "password": "passwordIT08"
+}' > login.json
+```
+Setelah berhasil terkirim, jalankah perintah benchmarking pada client dengan perintah berikut
+```
+ab -n 100 -c 10 -p login.json -T application/json http://192.237.4.2:8001/api/auth/login
+```
 
 ---
 ### Soal 17
 GET /me
 - Penjelasan:
-![Foto](./img/17.png)
+Pada soal tersebut, kita bisa melakukan benchmarking pada laravel worker melalui client. Pertama kita perlu menyiapkan token terlebih dahulu. Untuk mendapatkan tokennya kita bisa mengakses endpoint `api/me` seperti berikut
+```
+curl -X POST -H "Content-Type: application/json" -d @login.json http://192.237.4.2:8001/api/auth/login > output.txt
+```
+Dan akan didapat sebuat txt bernama `login_output.txt` yang isinya token yang telah kita request sebelumnya. Lalu, set tokennya dengan cara berikut
+```
+token=$(cat output.txt | jq -r '.token')
+```
+Setelah itu, kita bisa melakukan testing benchmarking pada client dengan cara berikut
+```
+ab -n 100 -c 10 -H "Authorization: Bearer $token" http://192.237.4.2:8001/api/me
+```
 
 ---
 ### Soal 18
 Untuk memastikan ketiganya bekerja sama secara adil untuk mengatur Granz Channel maka implementasikan Proxy Bind pada Eisen untuk mengaitkan IP dari Frieren, Flamme, dan Fern.
 - Penjelasan:
-![Foto](./img/18.png)
+Pastikan node Eisen telah terkonfigurasi dengan baik sesuai dengan [konfigurasi](#konfigurasi) yang telah dilakukan di tahap awal. Selanjutnya, kita bisa melakukan konfigurasi berikut pada node eisen di ``
+```
+upstream worker {
+    server 192.237.4.2:8001;
+    server 192.237.4.3:8002;
+    server 192.237.4.4:8003;
+}
+server {
+    listen 80;
+    server_name riegel.canyon.it08.com www.riegel.canyon.it08.com;
+
+    location / {
+        proxy_pass http://worker;
+    }
+}
+```
+Lakukan proses symlink dan restart nginx
+```
+ln -s /etc/nginx/sites-available/laravel-worker /etc/nginx/sites-enabled/laravel-worker
+
+service nginx restart
+```
+Setelah melakukan beberapa konfigurasi tambahan pada node Eisen, lakukan testing benchmarking pada client seperti berikut
+```
+ab -n 100 -c 10 -p login.json -T application/json http://www.riegel.canyon.it08.com/api/auth/login
+```
+Selain menggunakan port, bisa juga menggunakan subdomain yang telah ditentukan sebelumnya
 
 ---
 ### Soal 19
@@ -865,10 +916,88 @@ Untuk meningkatkan performa dari Worker, coba implementasikan PHP-FPM pada Frier
 
 sebanyak tiga percobaan dan lakukan testing sebanyak 100 request dengan 10 request/second kemudian berikan hasil analisisnya pada Grimoire.
 - Penjelasan:
-![Foto](./img/19.png)
+Kita akan melakukan konfigurasi php-fpm yang berada pada masing-masing laravel worker. Parameter tersebut dapat diakses pada file `/etc/php/8.0/fpm/pool.d/www.conf`. Adapun 3 macam implementasi dari parameter yang akan kami gunakan adalah sebagai berikut
+> Script 1
+```
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.0-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+php_admin_value[disable_functions] = exec,passthru,shell_exec,system
+php_admin_flag[allow_url_fopen] = off
+
+; Choose how the process manager will control the number of child processes.
+
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 3
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+```
+> Script 2
+```
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.0-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+php_admin_value[disable_functions] = exec,passthru,shell_exec,system
+php_admin_flag[allow_url_fopen] = off
+
+; Choose how the process manager will control the number of child processes.
+
+pm = dynamic
+pm.max_children = 25
+pm.start_servers = 5
+pm.min_spare_servers = 3
+pm.max_spare_servers = 5
+```
+> Script 3
+```
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.0-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+php_admin_value[disable_functions] = exec,passthru,shell_exec,system
+php_admin_flag[allow_url_fopen] = off
+
+; Choose how the process manager will control the number of child processes.
+
+pm = dynamic
+pm.max_children = 50
+pm.start_servers = 7
+pm.min_spare_servers = 5
+pm.max_spare_servers = 10
+```
 
 ---
 ### Soal 20
 Nampaknya hanya menggunakan PHP-FPM tidak cukup untuk meningkatkan performa dari worker maka implementasikan Least-Conn pada Eisen. Untuk testing kinerja dari worker tersebut dilakukan sebanyak 100 request dengan 10 request/second.
 - Penjelasan:
-![Foto](./img/20.png)
+Kita bisa mengimplementasikan algoritma Least-Conn pada node Eisen dengan cara berikut
+```
+echo ' upstream worker {
+    least_conn; # tambahkan konfigurasi least connection
+    server 192.237.4.2:8001;
+    server 192.237.4.3:8002;
+    server 192.237.4.4:8003;
+}
+
+server {
+    listen 80;
+    server_name riegel.canyon.it08.com www.riegel.canyon.it08.com;
+
+    location / {
+        proxy_pass http://worker;
+    }
+} 
+```
+Restart nginx dan lakukan testing benchmarking pada client seperti berikut
+```
+ab -n 100 -c 10 -p login.json -T application/json http://riegel.canyon.it08.com/api/auth/login
+```
