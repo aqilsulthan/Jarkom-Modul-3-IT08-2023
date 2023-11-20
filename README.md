@@ -534,8 +534,6 @@ Jalankan perintah berikut pada node client, serta ubah upstream berdasarkan masi
 ab -n 200 -c 10 http://www.granz.channel.it08.com/ 
 ``` 
 Hasil:
-> Grafik perbandingan request per second
-![Foto](./img/grafik8.png)
 > Round Robin
 ![Foto](./img/8roundrobin_a.png)
 ![Foto](./img/8roundrobin_b.png)
@@ -548,7 +546,7 @@ Hasil:
 > Generic Hash
 ![Foto](./img/8genhash_a.png)
 ![Foto](./img/8genhash_b.png)
-
+Untuk laporan lebih detailnya daapt dilihat pada laporan grimoire yang sudah tertera.
 
 ---
 ### Soal 9
@@ -559,8 +557,6 @@ Jalankan perintah berikut pada node client dan jangan lupa testing jumlah worker
 ab -n 100 -c 10 http://www.granz.channel.it08.com/ 
 ``` 
 Hasil:
-> Grafik perbandingan request per second
-![Foto](./img/grafik9.png)
 > 1 Worker
 ![Foto](./img/9aw1.png)
 ![Foto](./img/9bw1.png)
@@ -570,6 +566,7 @@ Hasil:
 > 3 Worker
 ![Foto](./img/9aw3.png)
 ![Foto](./img/9bw3.png)
+Untuk laporan lebih detailnya daapt dilihat pada laporan grimoire yang sudah tertera.
 
 ---
 ### Soal 10
