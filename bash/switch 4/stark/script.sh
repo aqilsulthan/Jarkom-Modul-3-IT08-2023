@@ -9,9 +9,9 @@ apt-get install jq -y
 echo '
 # auto eth0
 # iface eth0 inet static
-#         address 192.243.4.5
+#         address 192.237.4.5
 #         netmask 255.255.255.0
-#         gateway 192.243.4.1
+#         gateway 192.237.4.1
 
 
 auto eth0
