@@ -546,7 +546,7 @@ Hasil:
 > Generic Hash
 ![Foto](./img/8genhash_a.png)
 ![Foto](./img/8genhash_b.png)
-Untuk laporan lebih detailnya daapt dilihat pada laporan grimoire yang sudah tertera.
+Untuk laporan lebih detailnya dapat dilihat pada laporan grimoire yang sudah tertera.
 
 ---
 ### Soal 9
@@ -566,7 +566,7 @@ Hasil:
 > 3 Worker
 ![Foto](./img/9aw3.png)
 ![Foto](./img/9bw3.png)
-Untuk laporan lebih detailnya daapt dilihat pada laporan grimoire yang sudah tertera.
+Untuk laporan lebih detailnya dapat dilihat pada laporan grimoire yang sudah tertera.
 
 ---
 ### Soal 10
