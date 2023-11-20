@@ -22,3 +22,19 @@ iface eth0 inet dhcp' > /etc/network/interfaces
 # TESTING ->
 cat /etc/resolv.conf
 ip a
+
+# POST Register 
+echo '
+{
+  "username": "kelompokit08",
+  "password": "passwordit08"
+}' > register.json
+
+# POST Login
+echo '
+{
+  "username": "kelompokit08",
+  "password": "passwordit08"
+}' > register.json
+
+# Get me
